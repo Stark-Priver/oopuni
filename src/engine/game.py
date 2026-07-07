@@ -425,7 +425,7 @@ class Game:
     def _restore_save_data(self, data):
         self.player = Player.deserialize(data["player"])
         self.calendar = AcademicCalendar.deserialize(data["calendar"])
-        self.timetable = Timetable.deserialize(data["timetable"])
+        self.timetable = Timetable.deserialize(data["timetable"], self.calendar)
         self.reputation = ReputationSystem.deserialize(data["reputation"])
         self.mission_system = MissionSystem.deserialize(data["missions"])
         self.campus = Campus.deserialize(data["campus"])

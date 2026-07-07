@@ -64,8 +64,8 @@ class Timetable:
         return {"entries": self.entries}
 
     @staticmethod
-    def deserialize(data):
+    def deserialize(data, calendar=None):
         timetable = Timetable.__new__(Timetable)
-        timetable.calendar = None
+        timetable.calendar = calendar
         timetable.entries = data["entries"]
         return timetable
