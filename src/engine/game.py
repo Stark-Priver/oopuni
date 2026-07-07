@@ -16,7 +16,7 @@ from src.ui.hud import HUD
 from src.ui.dialog import DialogSystem
 from src.ui.save_menu import SaveMenu
 from src.ui.pause_menu import PauseMenu
-from src.ui.tkinter_gui import TkinterGUI
+from src.ui.overlays import GameOverlay
 
 
 LOCATION_MISSION_KEYWORDS = {
@@ -62,7 +62,7 @@ class Game:
         self.dialog = DialogSystem()
         self.save_menu = SaveMenu(self.screen, self.save_system)
         self.pause_menu = PauseMenu(self.screen)
-        self.tkinter_gui = TkinterGUI(self)
+        self.overlay = GameOverlay(self.screen)
         self.paused = False
         self.previous_state = "playing"
         self.interact_prompt_timer = 0
@@ -80,6 +80,8 @@ class Game:
                 self._handle_save_menu_state(dt)
             elif self.state == "paused":
                 self._handle_paused_state(dt)
+            elif self.state == "overlay":
+                self._handle_overlay_state(dt)
             elif self.state == "game_over":
                 self._handle_game_over_state(dt)
         pygame.quit()
@@ -126,20 +128,24 @@ class Game:
                 elif event.key == pygame.K_TAB:
                     self._open_save_menu()
                 elif event.key == pygame.K_i:
-                    self.tkinter_gui.show_player_info(self.player)
+                    self.overlay.open("player_info")
+                    self.state = "overlay"
                 elif event.key == pygame.K_m:
-                    self.tkinter_gui.show_map(self.campus)
+                    self.overlay.open("map")
+                    self.state = "overlay"
                 elif event.key == pygame.K_j:
-                    self.tkinter_gui.show_missions(self.mission_system)
+                    self.overlay.open("missions")
+                    self.state = "overlay"
                 elif event.key == pygame.K_c:
-                    self.tkinter_gui.show_calendar(self.calendar, self.timetable)
+                    self.overlay.open("calendar")
+                    self.state = "overlay"
                 elif event.key == pygame.K_r:
-                    self.tkinter_gui.show_reputation(self.reputation)
+                    self.overlay.open("reputation")
+                    self.state = "overlay"
                 elif event.key == pygame.K_e:
                     self._interact_with_location()
 
             self.dialog.handle_event(event)
-            self.tkinter_gui.process_events()
 
         self.player.update(keys, self.campus, dt)
         self.camera.update(self.player)
@@ -306,6 +312,35 @@ class Game:
                 f"You explore {current_loc.name}.\n\n"
                 f"[TIP] Every building, system, and character in this game\n"
                 f"is an object. Try pressing E at locations to learn OOP!")
+
+    def _handle_overlay_state(self, dt):
+        self.renderer.clear()
+        self.renderer.draw_campus(self.campus, self.camera)
+        self.renderer.draw_npcs(self.npc_scheduler.get_all_npcs(), self.camera)
+        self.renderer.draw_player(self.player, self.camera)
+        self.renderer.draw_dialog(self.dialog)
+        self.hud.render(self.screen, False)
+        self.overlay.render(self)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.overlay.close()
+                    self.state = "playing"
+                elif event.key in (pygame.K_i, pygame.K_m, pygame.K_j, pygame.K_c, pygame.K_r):
+                    key_map = {pygame.K_i: "player_info", pygame.K_m: "map",
+                               pygame.K_j: "missions", pygame.K_c: "calendar", pygame.K_r: "reputation"}
+                    new = key_map[event.key]
+                    if new == self.overlay.active:
+                        self.overlay.close()
+                        self.state = "playing"
+                    else:
+                        self.overlay.open(new)
+                else:
+                    self.overlay.handle_event(event)
+        pygame.display.flip()
 
     def _handle_paused_state(self, dt):
         self.renderer.clear()
