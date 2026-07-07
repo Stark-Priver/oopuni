@@ -15,6 +15,7 @@ from src.ui.menu import MainMenu
 from src.ui.hud import HUD
 from src.ui.dialog import DialogSystem
 from src.ui.save_menu import SaveMenu
+from src.ui.pause_menu import PauseMenu
 from src.ui.tkinter_gui import TkinterGUI
 
 
@@ -60,8 +61,10 @@ class Game:
         self.hud = HUD(self.player, self.calendar, self.mission_system)
         self.dialog = DialogSystem()
         self.save_menu = SaveMenu(self.screen, self.save_system)
+        self.pause_menu = PauseMenu(self.screen)
         self.tkinter_gui = TkinterGUI(self)
         self.paused = False
+        self.previous_state = "playing"
         self.interact_prompt_timer = 0
         self.show_interact_prompt = False
         self.location_entry_dialog_shown = False
@@ -75,6 +78,8 @@ class Game:
                 self._handle_playing_state(dt)
             elif self.state == "save_menu":
                 self._handle_save_menu_state(dt)
+            elif self.state == "paused":
+                self._handle_paused_state(dt)
             elif self.state == "game_over":
                 self._handle_game_over_state(dt)
         pygame.quit()
@@ -113,7 +118,7 @@ class Game:
                 self.running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.paused = not self.paused
+                    self.state = "paused"
                 elif event.key == pygame.K_F5:
                     self._quick_save()
                 elif event.key == pygame.K_F9:
@@ -136,24 +141,21 @@ class Game:
             self.dialog.handle_event(event)
             self.tkinter_gui.process_events()
 
-        if not self.paused:
-            self.player.update(keys, self.campus, dt)
-            self.camera.update(self.player)
-            self.npc_scheduler.update(dt, self.game_timer)
-            self.game_timer.update(dt)
-            self.calendar.update(dt)
-            self.timetable.update()
-            self.mission_system.update(self.player, self.calendar)
-            self._check_location_interactions()
+        self.player.update(keys, self.campus, dt)
+        self.camera.update(self.player)
+        self.npc_scheduler.update(dt, self.game_timer)
+        self.game_timer.update(dt)
+        self.calendar.update(dt)
+        self.timetable.update()
+        self.mission_system.update(self.player, self.calendar)
+        self._check_location_interactions()
 
         self.renderer.clear()
         self.renderer.draw_campus(self.campus, self.camera)
         self.renderer.draw_npcs(self.npc_scheduler.get_all_npcs(), self.camera)
         self.renderer.draw_player(self.player, self.camera)
         self.renderer.draw_dialog(self.dialog)
-        self.hud.render(self.screen, self.paused)
-        if self.paused:
-            self.renderer.draw_pause_overlay()
+        self.hud.render(self.screen, False)
         if self.show_interact_prompt and not self.dialog.visible:
             self.renderer.draw_interact_prompt(self.player, self.campus)
         pygame.display.flip()
@@ -305,22 +307,51 @@ class Game:
                 f"[TIP] Every building, system, and character in this game\n"
                 f"is an object. Try pressing E at locations to learn OOP!")
 
+    def _handle_paused_state(self, dt):
+        self.renderer.clear()
+        self.renderer.draw_campus(self.campus, self.camera)
+        self.renderer.draw_npcs(self.npc_scheduler.get_all_npcs(), self.camera)
+        self.renderer.draw_player(self.player, self.camera)
+        self.renderer.draw_dialog(self.dialog)
+        self.hud.render(self.screen, False)
+        self.pause_menu.render()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            result = self.pause_menu.handle_event(event)
+            if result == "resume":
+                self.state = "playing"
+            elif result == "save":
+                self.previous_state = "paused"
+                self.state = "save_menu"
+                self.save_menu.set_mode("save")
+            elif result == "load":
+                self.previous_state = "paused"
+                self.state = "save_menu"
+                self.save_menu.set_mode("load")
+            elif result == "quit_menu":
+                self.state = "menu"
+            elif result == "quit_desktop":
+                self.running = False
+        pygame.display.flip()
+
     def _handle_save_menu_state(self, dt):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
             result = self.save_menu.handle_event(event)
             if result == "back":
-                self.state = "playing"
+                self.state = self.previous_state
             elif result and isinstance(result, dict):
                 if "save" in result:
                     self.save_system.save(result["save"], self._build_save_data())
-                    self.state = "playing"
+                    self.state = self.previous_state
                 elif "load" in result:
                     data = self.save_system.load(result["load"])
                     if data:
                         self._restore_save_data(data)
-                    self.state = "playing"
+                    self.state = self.previous_state
         self.save_menu.render()
         pygame.display.flip()
 
@@ -379,5 +410,6 @@ class Game:
             self.dialog.show_message("Quick Load", "Save restored successfully.")
 
     def _open_save_menu(self):
+        self.previous_state = "playing"
         self.state = "save_menu"
         self.save_menu.set_mode("save")

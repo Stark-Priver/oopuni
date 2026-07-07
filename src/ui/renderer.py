@@ -90,37 +90,27 @@ class Renderer:
 
     def draw_dialog(self, dialog):
         if dialog.visible and dialog.text:
-            box_width = min(800, self.screen.get_width() - 40)
-            box_height = 120
+            box_width = min(900, self.screen.get_width() - 40)
+            box_height = 160
             bx = (self.screen.get_width() - box_width) // 2
             by = self.screen.get_height() - box_height - 20
             pygame.draw.rect(self.screen, BLACK, (bx, by, box_width, box_height))
-            pygame.draw.rect(self.screen, WHITE, (bx, by, box_width, box_height), 2)
+            pygame.draw.rect(self.screen, (60, 60, 80), (bx, by, box_width, box_height), 2)
 
             title_label = self.font_small.render(dialog.title, True, CYAN)
-            self.screen.blit(title_label, (bx + 10, by + 8))
+            self.screen.blit(title_label, (bx + 12, by + 8))
 
-            lines = self._wrap_text(dialog.text, self.font_medium, box_width - 20)
-            for i, line in enumerate(lines[:4]):
-                self.screen.blit(line, (bx + 10, by + 32 + i * 22))
+            lines = self._wrap_text(dialog.text, self.font_medium, box_width - 24)
+            max_lines = 5
+            for i, line in enumerate(lines[:max_lines]):
+                self.screen.blit(line, (bx + 12, by + 30 + i * 24))
 
-            continue_text = self.font_small.render("Press SPACE to continue", True, LIGHT_GRAY)
-            self.screen.blit(continue_text, (bx + box_width - 180, by + box_height - 24))
+            if len(lines) > max_lines:
+                more = self.font_small.render(f"... ({len(lines) - max_lines} more lines)", True, LIGHT_GRAY)
+                self.screen.blit(more, (bx + 12, by + 30 + max_lines * 24))
 
-    def draw_pause_overlay(self):
-        overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
-        overlay.set_alpha(128)
-        overlay.fill(BLACK)
-        self.screen.blit(overlay, (0, 0))
-        pause_text = self.font_large.render("PAUSED", True, WHITE)
-        self.screen.blit(pause_text, (self.screen.get_width() // 2 - pause_text.get_width() // 2,
-                                       self.screen.get_height() // 2 - 50))
-        hint1 = self.font_small.render("F5: Quick Save | F9: Quick Load | TAB: Save Menu", True, LIGHT_GRAY)
-        hint2 = self.font_small.render("I: Player Info | M: Map | J: Missions | C: Calendar | R: Reputation", True, LIGHT_GRAY)
-        hint3 = self.font_small.render("E: Interact  |  ESC: Resume", True, LIGHT_GRAY)
-        self.screen.blit(hint1, (self.screen.get_width() // 2 - hint1.get_width() // 2, self.screen.get_height() // 2))
-        self.screen.blit(hint2, (self.screen.get_width() // 2 - hint2.get_width() // 2, self.screen.get_height() // 2 + 24))
-        self.screen.blit(hint3, (self.screen.get_width() // 2 - hint3.get_width() // 2, self.screen.get_height() // 2 + 48))
+            continue_text = self.font_small.render("SPACE to continue", True, LIGHT_GRAY)
+            self.screen.blit(continue_text, (bx + box_width - 130, by + box_height - 22))
 
     def draw_interact_prompt(self, player, campus):
         current_loc = campus.get_location_at(player.x, player.y)
@@ -140,17 +130,19 @@ class Renderer:
         self.screen.blit(loc_name, (lx, ly))
 
     def _wrap_text(self, text, font, max_width):
-        words = text.split(' ')
+        paragraphs = text.split('\n')
         lines = []
-        current_line = ''
-        for word in words:
-            test_line = current_line + word + ' '
-            if font.size(test_line)[0] <= max_width:
-                current_line = test_line
-            else:
-                if current_line:
-                    lines.append(font.render(current_line.strip(), True, WHITE))
-                current_line = word + ' '
-        if current_line:
-            lines.append(font.render(current_line.strip(), True, WHITE))
+        for para in paragraphs:
+            words = para.split(' ')
+            current_line = ''
+            for word in words:
+                test_line = current_line + word + ' '
+                if font.size(test_line)[0] <= max_width:
+                    current_line = test_line
+                else:
+                    if current_line:
+                        lines.append(font.render(current_line.strip(), True, WHITE))
+                    current_line = word + ' '
+            if current_line:
+                lines.append(font.render(current_line.strip(), True, WHITE))
         return lines if lines else [font.render(text, True, WHITE)]
