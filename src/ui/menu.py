@@ -1,5 +1,5 @@
 import pygame
-from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, WHITE, BLACK, BLUE, CYAN, LIGHT_GRAY
+from src.config import WHITE, BLACK, BLUE, CYAN, LIGHT_GRAY
 
 
 class MainMenu:
@@ -32,19 +32,20 @@ class MainMenu:
     def render(self):
         self.screen.fill((10, 10, 30))
 
-        for y_offset in range(0, SCREEN_HEIGHT, 4):
+        sw, sh = self.screen.get_width(), self.screen.get_height()
+        for y_offset in range(0, sh, 4):
             shade = max(0, 255 - y_offset // 6)
-            pygame.draw.line(self.screen, (shade // 3, shade // 3, shade), (0, y_offset), (SCREEN_WIDTH, y_offset))
+            pygame.draw.line(self.screen, (shade // 3, shade // 3, shade), (0, y_offset), (sw, y_offset))
 
         title_shadow = self.font_title.render(self.title, True, (0, 100, 200))
         title_text = self.font_title.render(self.title, True, CYAN)
         subtitle_text = self.font_subtitle.render(self.subtitle, True, LIGHT_GRAY)
 
-        tx = SCREEN_WIDTH // 2 - title_text.get_width() // 2
+        tx = sw // 2 - title_text.get_width() // 2
         ty = 120
         self.screen.blit(title_shadow, (tx + 3, ty + 3))
         self.screen.blit(title_text, (tx, ty))
-        self.screen.blit(subtitle_text, (SCREEN_WIDTH // 2 - subtitle_text.get_width() // 2, ty + 80))
+        self.screen.blit(subtitle_text, (sw // 2 - subtitle_text.get_width() // 2, ty + 80))
 
         lines = [
             "A Story-Driven Educational Adventure Game",
@@ -52,12 +53,12 @@ class MainMenu:
         ]
         for i, line in enumerate(lines):
             ltext = self.font_hint.render(line, True, LIGHT_GRAY)
-            self.screen.blit(ltext, (SCREEN_WIDTH // 2 - ltext.get_width() // 2, ty + 115 + i * 22))
+            self.screen.blit(ltext, (sw // 2 - ltext.get_width() // 2, ty + 115 + i * 22))
 
         for i, option in enumerate(self.options):
             color = CYAN if i == self.selected else LIGHT_GRAY
             text = self.font_menu.render(option, True, color)
-            ox = SCREEN_WIDTH // 2 - text.get_width() // 2
+            ox = sw // 2 - text.get_width() // 2
             oy = 350 + i * 50
             if i == self.selected:
                 pygame.draw.rect(self.screen, (30, 30, 80), (ox - 20, oy - 8, text.get_width() + 40, 40))
@@ -70,8 +71,7 @@ class MainMenu:
         ]
         for i, hint in enumerate(hints):
             htext = self.font_hint.render(hint, True, LIGHT_GRAY)
-            self.screen.blit(htext, (SCREEN_WIDTH // 2 - htext.get_width() // 2,
-                                      SCREEN_HEIGHT - 60 + i * 20))
+            self.screen.blit(htext, (sw // 2 - htext.get_width() // 2, sh - 60 + i * 20))
 
         version = self.font_hint.render("v1.0.0", True, (100, 100, 100))
-        self.screen.blit(version, (SCREEN_WIDTH - 80, SCREEN_HEIGHT - 30))
+        self.screen.blit(version, (sw - 80, sh - 30))

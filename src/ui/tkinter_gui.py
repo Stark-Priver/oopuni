@@ -287,8 +287,12 @@ class TkinterGUI:
 
     def _clear_window(self):
         if self.root:
-            for widget in self.root.winfo_children():
-                widget.destroy()
+            try:
+                if self.root.winfo_exists():
+                    for widget in self.root.winfo_children():
+                        widget.destroy()
+            except tk.TclError:
+                self.root = None
 
     def _hide_window(self):
         if self.root:

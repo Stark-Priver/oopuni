@@ -131,13 +131,22 @@ class MissionSystem:
 
     def update(self, player, calendar):
         if calendar.year == 1 and calendar.current_event == "Registration":
-            if "year1_admission" not in [m.mission_id for m in self.active_missions + self.completed_missions]:
+            if not self.is_mission_active("year1_admission") and not self.is_mission_completed("year1_admission"):
                 self.start_mission("year1_admission")
 
+    def is_mission_active(self, mission_id):
+        return any(m.mission_id == mission_id for m in self.active_missions)
+
+    def is_mission_completed(self, mission_id):
+        return any(m.mission_id == mission_id for m in self.completed_missions)
+
     def on_location_entered(self, location_name):
+        loc_lower = location_name.lower()
         for mission in self.active_missions:
-            if location_name in [obj for obj in mission.objectives]:
-                mission.progress += 1
+            for obj in mission.objectives:
+                if loc_lower in obj.lower():
+                    mission.progress += 1
+                    break
 
     def get_active_mission_count(self):
         return len(self.active_missions)

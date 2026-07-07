@@ -122,6 +122,23 @@ class Renderer:
         self.screen.blit(hint2, (self.screen.get_width() // 2 - hint2.get_width() // 2, self.screen.get_height() // 2 + 24))
         self.screen.blit(hint3, (self.screen.get_width() // 2 - hint3.get_width() // 2, self.screen.get_height() // 2 + 48))
 
+    def draw_interact_prompt(self, player, campus):
+        current_loc = campus.get_location_at(player.x, player.y)
+        if not current_loc:
+            return
+        prompt = self.font_small.render("Press E to interact", True, YELLOW)
+        prompt_shadow = self.font_small.render("Press E to interact", True, BLACK)
+        px = self.screen.get_width() // 2 - prompt.get_width() // 2
+        py = self.screen.get_height() // 2 + 40
+        self.screen.blit(prompt_shadow, (px + 1, py + 1))
+        self.screen.blit(prompt, (px, py))
+        loc_name = self.font_medium.render(current_loc.name, True, WHITE)
+        loc_shadow = self.font_medium.render(current_loc.name, True, BLACK)
+        lx = self.screen.get_width() // 2 - loc_name.get_width() // 2
+        ly = self.screen.get_height() // 2 - 40
+        self.screen.blit(loc_shadow, (lx + 1, ly + 1))
+        self.screen.blit(loc_name, (lx, ly))
+
     def _wrap_text(self, text, font, max_width):
         words = text.split(' ')
         lines = []

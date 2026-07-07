@@ -1,5 +1,5 @@
 import pygame
-from src.config import SCREEN_WIDTH, WHITE, BLACK, CYAN, YELLOW, GREEN, RED, LIGHT_GRAY
+from src.config import WHITE, BLACK, CYAN, YELLOW, GREEN, RED, LIGHT_GRAY
 
 
 class HUD:

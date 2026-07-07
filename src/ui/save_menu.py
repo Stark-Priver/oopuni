@@ -1,5 +1,5 @@
 import pygame
-from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, SAVE_SLOTS, WHITE, BLACK, BLUE, CYAN, GREEN, YELLOW, RED, LIGHT_GRAY, DARK_GRAY
+from src.config import SAVE_SLOTS, WHITE, BLACK, BLUE, CYAN, GREEN, YELLOW, RED, LIGHT_GRAY, DARK_GRAY
 
 
 class SaveMenu:
@@ -39,15 +39,16 @@ class SaveMenu:
 
     def render(self):
         self.screen.fill((20, 20, 40))
+        sw, sh = self.screen.get_width(), self.screen.get_height()
 
         title_text = self.title_font.render(
             f"{'Save Game' if self.mode == 'save' else 'Load Game'}", True, CYAN)
-        self.screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 40))
+        self.screen.blit(title_text, (sw // 2 - title_text.get_width() // 2, 40))
 
         info_text = self.small_font.render(
             "Use UP/DOWN to select, ENTER to confirm, ESC to go back, DEL to delete save",
             True, LIGHT_GRAY)
-        self.screen.blit(info_text, (SCREEN_WIDTH // 2 - info_text.get_width() // 2, 90))
+        self.screen.blit(info_text, (sw // 2 - info_text.get_width() // 2, 90))
 
         for i in range(SAVE_SLOTS):
             slot_y = 140 + i * 90
@@ -56,8 +57,8 @@ class SaveMenu:
 
             bg_color = (30, 30, 60) if not is_selected else (50, 50, 100)
             border_color = CYAN if is_selected else (80, 80, 120)
-            pygame.draw.rect(self.screen, bg_color, (100, slot_y, SCREEN_WIDTH - 200, 80))
-            pygame.draw.rect(self.screen, border_color, (100, slot_y, SCREEN_WIDTH - 200, 80), 2)
+            pygame.draw.rect(self.screen, bg_color, (100, slot_y, sw - 200, 80))
+            pygame.draw.rect(self.screen, border_color, (100, slot_y, sw - 200, 80), 2)
 
             slot_label = self.font.render(f"Slot {i + 1}", True, YELLOW if is_selected else LIGHT_GRAY)
             self.screen.blit(slot_label, (120, slot_y + 8))
@@ -76,4 +77,4 @@ class SaveMenu:
 
         hint_text = self.small_font.render(
             "TIP: Quick Save with F5, Quick Load with F9 during gameplay", True, (100, 120, 100))
-        self.screen.blit(hint_text, (SCREEN_WIDTH // 2 - hint_text.get_width() // 2, SCREEN_HEIGHT - 30))
+        self.screen.blit(hint_text, (sw // 2 - hint_text.get_width() // 2, sh - 30))
