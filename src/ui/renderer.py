@@ -117,7 +117,7 @@ class Renderer:
                                        self.screen.get_height() // 2 - 50))
         hint1 = self.font_small.render("F5: Quick Save | F9: Quick Load | TAB: Save Menu", True, LIGHT_GRAY)
         hint2 = self.font_small.render("I: Player Info | M: Map | J: Missions | C: Calendar | R: Reputation", True, LIGHT_GRAY)
-        hint3 = self.font_small.render("ESC: Resume", True, LIGHT_GRAY)
+        hint3 = self.font_small.render("E: Interact  |  ESC: Resume", True, LIGHT_GRAY)
         self.screen.blit(hint1, (self.screen.get_width() // 2 - hint1.get_width() // 2, self.screen.get_height() // 2))
         self.screen.blit(hint2, (self.screen.get_width() // 2 - hint2.get_width() // 2, self.screen.get_height() // 2 + 24))
         self.screen.blit(hint3, (self.screen.get_width() // 2 - hint3.get_width() // 2, self.screen.get_height() // 2 + 48))

@@ -30,7 +30,7 @@ class TkinterGUI:
         self._clear_window()
         self.root.deiconify()
         self.root.title("Player Profile")
-        self.root.geometry("500x600+1380+100")
+        self.root.state("zoomed")
 
         frame = ttk.Frame(self.root, padding="20")
         frame.pack(fill=tk.BOTH, expand=True)
@@ -86,16 +86,32 @@ class TkinterGUI:
         self._clear_window()
         self.root.deiconify()
         self.root.title("Campus Map")
-        self.root.geometry("700x600+1380+100")
+        self.root.state("zoomed")
+        self.root.geometry("")
 
-        frame = ttk.Frame(self.root, padding="20")
+        frame = ttk.Frame(self.root, padding="10")
         frame.pack(fill=tk.BOTH, expand=True)
 
-        title = tk.Label(frame, text="MUST CAMPUS MAP", font=("Arial", 18, "bold"), fg="#1a5276")
-        title.pack(pady=(0, 10))
+        header = ttk.Frame(frame)
+        header.pack(fill=tk.X, pady=(0, 10))
+        title = tk.Label(header, text="MUST CAMPUS MAP", font=("Arial", 20, "bold"), fg="#1a5276")
+        title.pack(side=tk.LEFT)
+        close_btn = ttk.Button(header, text="Close (ESC)", command=self._hide_window)
+        close_btn.pack(side=tk.RIGHT)
 
-        canvas = tk.Canvas(frame, bg="#f0f0f0", highlightthickness=1, highlightbackground="#ccc")
-        canvas.pack(fill=tk.BOTH, expand=True)
+        canvas_frame = ttk.Frame(frame)
+        canvas_frame.pack(fill=tk.BOTH, expand=True)
+
+        h_scroll = ttk.Scrollbar(canvas_frame, orient=tk.HORIZONTAL)
+        v_scroll = ttk.Scrollbar(canvas_frame, orient=tk.VERTICAL)
+        canvas = tk.Canvas(canvas_frame, bg="#f0f0f0", highlightthickness=0,
+                           xscrollcommand=h_scroll.set, yscrollcommand=v_scroll.set,
+                           scrollregion=(0, 0, campus.width // 2, campus.height // 2))
+        h_scroll.config(command=canvas.xview)
+        v_scroll.config(command=canvas.yview)
+        h_scroll.pack(side=tk.BOTTOM, fill=tk.X)
+        v_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         colors = {
             "admin": "#8B4513", "library": "#663399", "lecture": "#555555",
@@ -106,29 +122,28 @@ class TkinterGUI:
             "entrance": "#8B4513"
         }
 
-        scale = min(650 / max(campus.width, 1), 500 / max(campus.height, 1))
-
+        scale = 0.5
         for loc in campus.locations:
-            scaled_x = 25 + loc.x * scale
-            scaled_y = 25 + loc.y * scale
-            scaled_w = max(loc.width * scale, 8)
-            scaled_h = max(loc.height * scale, 8)
+            sx = 10 + loc.x * scale
+            sy = 10 + loc.y * scale
+            sw = max(loc.width * scale, 10)
+            sh = max(loc.height * scale, 10)
             color = colors.get(loc.type, "#999")
-            canvas.create_rectangle(scaled_x, scaled_y, scaled_x + scaled_w, scaled_y + scaled_h,
+            canvas.create_rectangle(sx, sy, sx + sw, sy + sh,
                                     fill=color, outline="white", width=1)
-            if scaled_w > 30:
-                canvas.create_text(scaled_x + scaled_w / 2, scaled_y + scaled_h / 2,
-                                   text=loc.name[:12], fill="white", font=("Arial", 7, "bold"))
-
-        close_btn = ttk.Button(frame, text="Close (ESC)", command=self._hide_window)
-        close_btn.pack(pady=10)
+            if sw > 40:
+                canvas.create_text(sx + sw / 2, sy + sh / 2,
+                                   text=loc.name[:16], fill="white", font=("Arial", 8, "bold"))
+            elif sw > 20:
+                canvas.create_text(sx + sw / 2, sy + sh / 2,
+                                   text=loc.name[:6], fill="white", font=("Arial", 6))
 
     def show_missions(self, mission_system):
         self._ensure_root()
         self._clear_window()
         self.root.deiconify()
         self.root.title("Missions")
-        self.root.geometry("600x500+1380+100")
+        self.root.state("zoomed")
 
         frame = ttk.Frame(self.root, padding="20")
         frame.pack(fill=tk.BOTH, expand=True)
@@ -175,7 +190,7 @@ class TkinterGUI:
         self._clear_window()
         self.root.deiconify()
         self.root.title("Academic Calendar")
-        self.root.geometry("550x500+1380+100")
+        self.root.state("zoomed")
 
         frame = ttk.Frame(self.root, padding="20")
         frame.pack(fill=tk.BOTH, expand=True)
@@ -225,7 +240,7 @@ class TkinterGUI:
         self._clear_window()
         self.root.deiconify()
         self.root.title("Reputation")
-        self.root.geometry("500x500+1380+100")
+        self.root.state("zoomed")
 
         frame = ttk.Frame(self.root, padding="20")
         frame.pack(fill=tk.BOTH, expand=True)

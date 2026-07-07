@@ -162,6 +162,8 @@ class Game:
         return LOCATION_MISSION_KEYWORDS.get(loc_name, loc_name)
 
     def _check_location_interactions(self):
+        if self.dialog.visible:
+            return
         current_loc = self.campus.get_location_at(self.player.x, self.player.y)
         self.show_interact_prompt = current_loc is not None
         if current_loc and current_loc != self.player.current_location:
@@ -228,31 +230,80 @@ class Game:
                 self.dialog.show_message("Administration Office",
                     "You are already registered. Your details are on file.")
         elif current_loc.name == "Library Reading Room":
-            self.dialog.show_message("Library",
-                "You browse the shelves and find a book on OOP Principles.\n"
-                "You check it out using your student ID.")
             self.player.add_item(type("Item", (), {"name": "OOP Principles Book"})())
             self.mission_system.on_location_entered("Library")
+            self.dialog.show_message("Library - OOP Concept: Abstraction",
+                "You find a book on Object-Oriented Programming.\n\n"
+                "[OOP Concept: ABSTRACTION]\n"
+                "Abstraction means hiding complex details and showing only\n"
+                "the essential features. Like how a library lets you borrow books\n"
+                "without knowing the entire catalog system — you just use the\n"
+                "interface (the checkout desk). In code, abstract classes and\n"
+                "interfaces define WHAT to do, not HOW to do it.")
         elif "Lecture Theatre" in current_loc.name:
-            self.dialog.show_message("Lecture",
-                "You attend the lecture. The professor explains OOP concepts.\n"
-                "Objects, classes, inheritance — it all starts to make sense.")
             self.mission_system.on_location_entered("Lecture Theatre A")
+            self.dialog.show_message("Lecture - OOP Concept: Classes & Objects",
+                "The professor writes on the board:\n\n"
+                "[OOP Concept: CLASSES & OBJECTS]\n"
+                "A Class is a blueprint — like the architecture plan for a building.\n"
+                "An Object is an instance — like the actual building constructed\n"
+                "from that plan. You are an object of the Student class!\n"
+                "The campus itself? Each building is an object, each system\n"
+                "an object. Everything in our code is an object.")
         elif current_loc.name == "Cafeteria Hall":
-            self.dialog.show_message("Cafeteria",
-                "You grab a meal and meet fellow students. They share tips about campus life.")
             self.mission_system.on_location_entered("Cafeteria")
+            self.dialog.show_message("Cafeteria - OOP Concept: Encapsulation",
+                "Over a plate of chips, a senior explains:\n\n"
+                "[OOP Concept: ENCAPSULATION]\n"
+                "Encapsulation bundles data and methods together, keeping\n"
+                "internal details private. Like a vending machine: you press\n"
+                "a button (public method) and get food — you don't access\n"
+                "the internal mechanics. In code, we use private attributes\n"
+                "with getters and setters to protect data integrity.")
         elif current_loc.name == "Student Lounge":
-            self.dialog.show_message("Student Centre",
-                "Senior students welcome you. They explain the orientation schedule.")
             self.mission_system.on_location_entered("Student Centre")
+            self.dialog.show_message("Student Centre - OOP Concept: Inheritance",
+                "A senior student draws a diagram on a napkin:\n\n"
+                "[OOP Concept: INHERITANCE]\n"
+                "Inheritance lets a class acquire properties from a parent class.\n"
+                "Like how all MUST students share common traits (name, ID, email)\n"
+                "but CS students have unique attributes (programming skills).\n"
+                "Child classes inherit from parent classes, then add their own\n"
+                "specialized features. Code reuse at its finest!")
         elif "Hostel" in current_loc.name:
-            self.dialog.show_message(current_loc.name,
-                "You check out the hostel facilities. This will be your home for the next few years.")
             self.mission_system.on_location_entered("Hostel")
+            self.dialog.show_message("Hostel - OOP Concept: Polymorphism",
+                "Your roommate explains while unpacking:\n\n"
+                "[OOP Concept: POLYMORPHISM]\n"
+                "Polymorphism means 'many forms' — the same method name\n"
+                "behaving differently across classes. Like how all students\n"
+                "have a 'study()' method, but a CS student codes, an Engineering\n"
+                "student builds, and a Business student analyzes markets.\n"
+                "Same interface, different implementations! Method overriding\n"
+                "is a key example of polymorphism.")
+        elif current_loc.name == "Computer Lab" or current_loc.name == "Computer Science Lab":
+            self.mission_system.on_location_entered("Computer Lab")
+            self.dialog.show_message("Computer Lab - OOP Practice",
+                "You sit at a terminal and practice coding.\n\n"
+                "[OOP IN ACTION]\n"
+                "class Student:\n"
+                "    def __init__(self, name, student_id):\n"
+                "        self.name = name           # attribute\n"
+                "        self.student_id = student_id\n"
+                "    def study(self):               # method\n"
+                "        print(f'{self.name} is studying')\n\n"
+                "This is a real Python class. You just created one\n"
+                "by registering! Your player object IS an instance.")
+        elif current_loc.name == "Health Centre":
+            self.dialog.show_message("Health Centre",
+                "The nurse checks your vitals. You're in perfect health.\n"
+                "Well, maybe a little code-sick from all that learning.")
         else:
+            self.mission_system.on_location_entered(current_loc.name)
             self.dialog.show_message(current_loc.name,
-                f"You explore {current_loc.name}. There's much to discover at MUST!")
+                f"You explore {current_loc.name}.\n\n"
+                f"[TIP] Every building, system, and character in this game\n"
+                f"is an object. Try pressing E at locations to learn OOP!")
 
     def _handle_save_menu_state(self, dt):
         for event in pygame.event.get():
@@ -263,10 +314,10 @@ class Game:
                 self.state = "playing"
             elif result and isinstance(result, dict):
                 if "save" in result:
-                    self.save_system.save(result["slot"], self._build_save_data())
+                    self.save_system.save(result["save"], self._build_save_data())
                     self.state = "playing"
                 elif "load" in result:
-                    data = self.save_system.load(result["slot"])
+                    data = self.save_system.load(result["load"])
                     if data:
                         self._restore_save_data(data)
                     self.state = "playing"
