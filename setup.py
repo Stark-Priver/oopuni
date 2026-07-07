@@ -6,14 +6,14 @@ setup(
     description="OOP UNI: The Journey Through MUST - A Story-Driven Educational Adventure Game",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
-    author="MUST Game Development Team",
-    author_email="gamedev@must.ac.tz",
+    author="Enock Stanslaus",
+    author_email="enockstanslaus26@gmail.com",
     url="https://github.com/Stark-Priver/oopuni",
     packages=find_packages(),
     include_package_data=True,
     python_requires=">=3.8",
     install_requires=[
-        "pygame>=2.0.0",
+        "pygame-ce>=2.5.0",
     ],
     entry_points={
         "console_scripts": [
